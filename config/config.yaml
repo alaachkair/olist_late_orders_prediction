@@ -1,0 +1,15 @@
+# Project configuration
+project:
+  name: "olist_late_orders_prediction"
+  version: "0.1.0"
+
+# Paths (no hardcoded paths in code)
+paths:
+  data_dir: "data"
+  models_dir: "models"
+  logs_dir: "logs"
+
+# Model
+model:
+  name: "late_order_model"
+  version: "1"
