@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 from typing import Dict, Any
 
@@ -11,48 +12,64 @@ from src.features import (
 from src.preprocessing import load_preprocessor, apply_preprocessor
 from src.predict import load_model, predict
 from src.validation import validate_order
+from src.logging_config import setup_logging
+
+
+logger = setup_logging()
 
 
 def run_inference(
     order: Dict[str, Any],
     city_mapping_path: str,
     preprocessor_path: str,
-    model_path: str
+    model_path: str,
+    model_version: str = "1"
 ) -> Dict[str, Any]:
     """
     Full inference pipeline for one order.
-
-    Steps:
-    1. Validate the input
-    2. Convert order dict to DataFrame
-    3. Apply city mapping
-    4. Create all features (city, time, review, log)
-    5. Apply the fitted preprocessor
-    6. Make prediction with the trained model
+    Includes logging, latency measurement, and error handling.
     """
+    start_time = time.time()
 
-    # 1. Validate input
-    validate_order(order)
+    try:
+        logger.info("Received prediction request")
+        logger.info(f"Input order: {order}")
 
-    # 2. Convert single order to DataFrame
-    df = pd.DataFrame([order])
+        # 1. Validate input
+        validate_order(order)
 
-    # 3. Load and apply city mapping
-    city_mapping = load_city_mapping(city_mapping_path)
-    df = apply_city_mapping(df, city_mapping)
+        # 2. Convert to DataFrame
+        df = pd.DataFrame([order])
 
-    # 4. Create features (exactly the same order as the notebook)
-    df = create_city_features(df)
-    df = create_time_features(df)
-    df = create_review_features(df)
-    df = create_log_features(df)
+        # 3. City mapping
+        city_mapping = load_city_mapping(city_mapping_path)
+        df = apply_city_mapping(df, city_mapping)
 
-    # 5. Load and apply the fitted preprocessor
-    preprocessor = load_preprocessor(preprocessor_path)
-    processed_df = apply_preprocessor(df, preprocessor)
+        # 4. Feature engineering
+        df = create_city_features(df)
+        df = create_time_features(df)
+        df = create_review_features(df)
+        df = create_log_features(df)
 
-    # 6. Load model and predict
-    model = load_model(model_path)
-    result = predict(model, processed_df)
+        # 5. Preprocessing
+        preprocessor = load_preprocessor(preprocessor_path)
+        processed_df = apply_preprocessor(df, preprocessor)
 
-    return result
+        # 6. Prediction
+        model = load_model(model_path)
+        result = predict(model, processed_df)
+
+        # Add model version and latency
+        latency = round(time.time() - start_time, 4)
+        result["model_version"] = model_version
+        result["latency_seconds"] = latency
+
+        logger.info(f"Prediction result: {result}")
+        logger.info(f"Latency: {latency} seconds")
+
+        return result
+
+    except Exception as e:
+        latency = round(time.time() - start_time, 4)
+        logger.error(f"Prediction failed after {latency}s: {str(e)}")
+        raise
