@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 
+
 def load_city_mapping(mapping_path: str) -> pd.DataFrame:
     """
     Load the geo city cleaning mapping file.
