@@ -1,15 +1,18 @@
-# Project configuration
 project:
   name: "olist_late_orders_prediction"
   version: "0.1.0"
 
-# Paths (no hardcoded paths in code)
 paths:
   data_dir: "data"
   models_dir: "models"
   logs_dir: "logs"
 
-# Model
+  # Specific artifact paths
+  city_mapping: "data/geo_city_cleaning_mapping.csv"
+  preprocessor: "models/preprocessor.joblib"
+  model: "models/best_model.joblib"
+  feature_list: "models/feature_list.csv"
+
 model:
-  name: "late_order_model"
-  version: "1"
+  name: "hist_gradient_boosting"
+  version: "1"1"
