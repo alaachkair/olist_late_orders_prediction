@@ -1,6 +1,5 @@
 # Data & Artifacts (we will track important ones later with DVC)
-data/
-models/
+
 logs/
 stores/
 mlflow/
