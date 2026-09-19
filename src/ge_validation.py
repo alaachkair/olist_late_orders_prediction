@@ -1,33 +1,27 @@
 import pandas as pd
 from typing import Dict, Any
 import great_expectations as gx
-from great_expectations.core.batch import RuntimeBatchRequest
 
 
 def validate_with_great_expectations(order: Dict[str, Any]) -> None:
     """
-    Validate a single order using Great Expectations.
-    Raises an exception if validation fails.
+    Validate a single order using Great Expectations (simple runtime style).
+    Raises ValueError if validation fails.
     """
-    # Convert order to DataFrame
     df = pd.DataFrame([order])
 
-    # Create a minimal in-memory context
-    context = gx.get_context()
+    # Create an ephemeral context (no project files needed)
+    context = gx.get_context(mode="ephemeral")
 
-    # Define a simple suite of expectations
-    suite_name = "order_validation_suite"
+    # Create a datasource and data asset on the fly
+    data_source = context.data_sources.add_pandas("pandas_source")
+    data_asset = data_source.add_dataframe_asset(name="order_asset")
 
-    try:
-        suite = context.get_expectation_suite(suite_name)
-    except:
-        suite = context.add_expectation_suite(suite_name)
+    batch_definition = data_asset.add_batch_definition_whole_dataframe("batch_def")
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
-    # Clear old expectations (to keep it clean)
-    suite.expectations = []
-
-    # === Basic expectations ===
-    # Required columns exist
+    # Define expectations directly on the batch
+    # 1. Required columns exist
     required_columns = [
         "order_purchase_timestamp",
         "order_estimated_delivery_date",
@@ -49,87 +43,43 @@ def validate_with_great_expectations(order: Dict[str, Any]) -> None:
     ]
 
     for col in required_columns:
-        suite.add_expectation(
-            gx.expectations.ExpectColumnToExist(column=col)
-        )
+        result = batch.expect_column_to_exist(col)
+        if not result.success:
+            raise ValueError(f"Missing required column: {col}")
 
-    # Numeric columns should not be null
+    # 2. Numeric columns should not be null
     numeric_columns = [
-        "item_count",
-        "total_item_price",
-        "total_freight_value",
-        "unique_products",
-        "unique_sellers",
-        "payment_count",
-        "total_payment_value",
-        "max_installments",
-        "unique_payment_types",
-        "review_count",
-        "avg_review_score",
-        "min_review_score",
+        "item_count", "total_item_price", "total_freight_value",
+        "unique_products", "unique_sellers", "payment_count",
+        "total_payment_value", "max_installments", "unique_payment_types",
+        "review_count", "avg_review_score", "min_review_score",
         "customer_zip_code"
     ]
 
     for col in numeric_columns:
-        suite.add_expectation(
-            gx.expectations.ExpectColumnValuesToNotBeNull(column=col)
-        )
+        result = batch.expect_column_values_to_not_be_null(col)
+        if not result.success:
+            raise ValueError(f"Null values found in column: {col}")
 
-    # Simple range checks
-    suite.add_expectation(
-        gx.expectations.ExpectColumnValuesToBeBetween(
-            column="item_count", min_value=1, max_value=50
-        )
-    )
-    suite.add_expectation(
-        gx.expectations.ExpectColumnValuesToBeBetween(
-            column="total_item_price", min_value=0, max_value=100000
-        )
-    )
-    suite.add_expectation(
-        gx.expectations.ExpectColumnValuesToBeBetween(
-            column="avg_review_score", min_value=0, max_value=5
-        )
-    )
+    # 3. Simple range checks
+    result = batch.expect_column_values_to_be_between("item_count", min_value=1, max_value=50)
+    if not result.success:
+        raise ValueError("item_count is out of allowed range (1-50)")
 
-    # Allowed states (Brazilian states)
+    result = batch.expect_column_values_to_be_between("total_item_price", min_value=0, max_value=100000)
+    if not result.success:
+        raise ValueError("total_item_price is out of allowed range")
+
+    result = batch.expect_column_values_to_be_between("avg_review_score", min_value=0, max_value=5)
+    if not result.success:
+        raise ValueError("avg_review_score must be between 0 and 5")
+
+    # 4. Allowed Brazilian states
     brazilian_states = [
         "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA",
         "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN",
         "RO", "RR", "RS", "SC", "SE", "SP", "TO"
     ]
-    suite.add_expectation(
-        gx.expectations.ExpectColumnValuesToBeInSet(
-            column="customer_state",
-            value_set=brazilian_states
-        )
-    )
-
-    # Save the suite
-    context.save_expectation_suite(suite)
-
-    # Run validation
-    batch_request = RuntimeBatchRequest(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="order_data",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={"default_identifier_name": "default"}
-    )
-
-    # For simplicity we use a basic validator approach
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=suite_name
-    )
-
-    results = validator.validate()
-
-    if not results["success"]:
-        # Collect failed expectations
-        failed = [
-            exp["expectation_config"]["expectation_type"]
-            for exp in results["results"]
-            if not exp["success"]
-        ]
-        raise ValueError(f"Data validation failed. Failed expectations: {failed}")
+    result = batch.expect_column_values_to_be_in_set("customer_state", value_set=brazilian_states)
+    if not result.success:
+        raise ValueError(f"customer_state must be one of: {brazilian_states}")
