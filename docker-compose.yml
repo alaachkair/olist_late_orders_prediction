@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: olist_prediction_api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount models and data so the container can access the artifacts
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlflow.db:/app/mlflow.db
+      - ./logs:/app/logs
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:///mlflow.db
+    restart: unless-stopped
