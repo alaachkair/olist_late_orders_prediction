@@ -65,13 +65,13 @@ def run_inference(
 
         # 7. Load model (from registry or local file)
         if use_registry:
-            logger.info("Loading model from MLflow Model Registry (Staging)")
+            logger.info(f"Loading model from MLflow Model Registry ({config['model']['stage']})")
             model = load_model_from_registry(
                 model_name=config["model"]["registered_name"],
-                stage="Staging",
+                stage=config["model"]["stage"],
                 tracking_uri=config["mlflow"]["tracking_uri"]
             )
-            model_version = "Staging"
+            model_version = config["model"]["stage"]
         else:
             logger.info("Loading model from local file")
             model = load_model_from_file(config["paths"]["model"])

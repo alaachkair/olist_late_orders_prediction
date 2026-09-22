@@ -16,8 +16,8 @@ def load_model_from_file(model_path: str):
 
 def load_model_from_registry(
     model_name: str,
-    stage: str = "Staging",
-    tracking_uri: str = "sqlite:///mlflow.db"
+    stage: str,
+    tracking_uri: str
 ):
     """
     Load the model from MLflow Model Registry.
