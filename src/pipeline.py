@@ -1,4 +1,5 @@
 import time
+import yaml
 import pandas as pd
 from typing import Dict, Any
 
@@ -10,49 +11,46 @@ from src.features import (
     create_log_features
 )
 from src.preprocessing import load_preprocessor, apply_preprocessor
-from src.predict import load_model, predict
+from src.predict import load_model_from_registry, load_model_from_file, predict
 from src.validation import validate_order
 from src.ge_validation import validate_with_great_expectations
 from src.logging_config import setup_logging
-import os
-os.environ["LOKY_MAX_CPU_COUNT"] = "4"   # or any number of cores you have
+
 
 logger = setup_logging()
 
 
+def load_config(config_path: str = "config/config.yaml") -> dict:
+    with open(config_path, "r") as f:
+        return yaml.safe_load(f)
+
+
 def run_inference(
     order: Dict[str, Any],
-    city_mapping_path: str,
-    preprocessor_path: str,
-    model_path: str,
-    model_version: str = "1"
+    use_registry: bool = True
 ) -> Dict[str, Any]:
     """
     Full inference pipeline for one order.
-    Includes:
-    - Basic validation
-    - Great Expectations validation
-    - Logging
-    - Latency
-    - Error handling (reject on bad data)
+    Can load the model either from MLflow Model Registry or from a local file.
     """
     start_time = time.time()
+    config = load_config()
 
     try:
         logger.info("Received prediction request")
         logger.info(f"Input order: {order}")
 
-        # 1. Basic required fields check
+        # 1. Basic validation
         validate_order(order)
 
-        # 2. Great Expectations validation
+        # 2. Great Expectations style validation
         validate_with_great_expectations(order)
 
         # 3. Convert to DataFrame
         df = pd.DataFrame([order])
 
         # 4. City mapping
-        city_mapping = load_city_mapping(city_mapping_path)
+        city_mapping = load_city_mapping(config["paths"]["city_mapping"])
         df = apply_city_mapping(df, city_mapping)
 
         # 5. Feature engineering
@@ -62,11 +60,24 @@ def run_inference(
         df = create_log_features(df)
 
         # 6. Preprocessing
-        preprocessor = load_preprocessor(preprocessor_path)
+        preprocessor = load_preprocessor(config["paths"]["preprocessor"])
         processed_df = apply_preprocessor(df, preprocessor)
 
-        # 7. Prediction
-        model = load_model(model_path)
+        # 7. Load model (from registry or local file)
+        if use_registry:
+            logger.info("Loading model from MLflow Model Registry (Staging)")
+            model = load_model_from_registry(
+                model_name=config["model"]["registered_name"],
+                stage="Staging",
+                tracking_uri=config["mlflow"]["tracking_uri"]
+            )
+            model_version = "Staging"
+        else:
+            logger.info("Loading model from local file")
+            model = load_model_from_file(config["paths"]["model"])
+            model_version = config["model"]["version"]
+
+        # 8. Predict
         result = predict(model, processed_df)
 
         # Add metadata
@@ -82,5 +93,4 @@ def run_inference(
     except Exception as e:
         latency = round(time.time() - start_time, 4)
         logger.error(f"Prediction failed after {latency}s: {str(e)}")
-        # We re-raise so the caller (API later) can return a proper error
         raise
