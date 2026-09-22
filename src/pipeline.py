@@ -14,7 +14,8 @@ from src.predict import load_model, predict
 from src.validation import validate_order
 from src.ge_validation import validate_with_great_expectations
 from src.logging_config import setup_logging
-
+import os
+os.environ["LOKY_MAX_CPU_COUNT"] = "4"   # or any number of cores you have
 
 logger = setup_logging()
 
