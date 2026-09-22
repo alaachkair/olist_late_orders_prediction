@@ -7,7 +7,6 @@ paths:
   models_dir: "models"
   logs_dir: "logs"
 
-  # Specific artifact paths
   city_mapping: "data/geo_city_cleaning_mapping.csv"
   preprocessor: "models/preprocessor.joblib"
   model: "models/best_model.joblib"
@@ -15,4 +14,9 @@ paths:
 
 model:
   name: "hist_gradient_boosting"
-  version: "1"1"
+  version: "1"
+  registered_name: "olist_late_order_model"
+
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  experiment_name: "olist_late_orders"
