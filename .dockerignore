@@ -1,0 +1,52 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/
+
+# Large / local artifacts (we mount them with volumes)
+models/
+data/
+logs/
+mlruns/
+mlflow.db
+*.joblib
+*.pkl
+*.parquet
+
+# DVC
+.dvc/
+.dvcignore
+
+# Misc
+*.md
+.env
+.env.*
+.DS_Store
+Thumbs.db
