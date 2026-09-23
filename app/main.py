@@ -1,3 +1,5 @@
+import time
+
 import yaml
 from fastapi import FastAPI, HTTPException
 
@@ -9,6 +11,7 @@ from app.schemas import (
     OrderRequest,
     PredictionResponse,
 )
+from src.metrics import get_metrics, record_request
 from src.pipeline import run_inference
 
 
@@ -40,13 +43,23 @@ def model_info():
     }
 
 
+@app.get("/metrics", tags=["Monitoring"])
+def metrics():
+    return get_metrics()
+
+
 @app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
 def predict_single(order: OrderRequest):
+    start = time.time()
     try:
         order_dict = order.model_dump()
         result = run_inference(order=order_dict, use_registry=False)
+        latency = time.time() - start
+        record_request(latency=latency, success=True, label=result["label"])
         return result
     except Exception as e:
+        latency = time.time() - start
+        record_request(latency=latency, success=False)
         raise HTTPException(status_code=400, detail=str(e))
 
 
