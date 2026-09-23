@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+from pathlib import Path
 from src.predict import load_model_from_file, predict
 from src.preprocessing import load_preprocessor, apply_preprocessor
 from src.features import (
@@ -17,16 +18,26 @@ def load_config():
         return yaml.safe_load(f)
 
 
+def artifacts_exist() -> bool:
+    """Check if the required model and data files exist."""
+    config = load_config()
+    model_path = Path(config["paths"]["model"])
+    mapping_path = Path(config["paths"]["city_mapping"])
+    preprocessor_path = Path(config["paths"]["preprocessor"])
+    return model_path.exists() and mapping_path.exists() and preprocessor_path.exists()
+
+
+@pytest.mark.skipif(not artifacts_exist(), reason="Model and data artifacts not available in CI")
 def test_model_loads():
     config = load_config()
     model = load_model_from_file(config["paths"]["model"])
     assert model is not None
 
 
+@pytest.mark.skipif(not artifacts_exist(), reason="Model and data artifacts not available in CI")
 def test_predict_returns_expected_keys():
     config = load_config()
 
-    # Minimal valid order
     order = {
         "order_purchase_timestamp": "2018-05-10 14:30:00",
         "order_approved_at": "2018-05-10 15:00:00",
@@ -50,7 +61,6 @@ def test_predict_returns_expected_keys():
 
     df = pd.DataFrame([order])
 
-    # Apply the same steps as the pipeline
     city_mapping = load_city_mapping(config["paths"]["city_mapping"])
     df = apply_city_mapping(df, city_mapping)
     df = create_city_features(df)
