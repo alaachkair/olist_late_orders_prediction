@@ -1,5 +1,4 @@
-from typing import Dict, Any, List
-
+from typing import Any, Dict
 
 REQUIRED_FIELDS = [
     "order_purchase_timestamp",
@@ -18,7 +17,7 @@ REQUIRED_FIELDS = [
     "unique_payment_types",
     "review_count",
     "avg_review_score",
-    "min_review_score"
+    "min_review_score",
 ]
 
 

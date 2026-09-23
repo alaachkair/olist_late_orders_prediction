@@ -1,9 +1,10 @@
+from pathlib import Path
+from typing import Any, Dict
+
 import joblib
 import mlflow
 import mlflow.sklearn
 import pandas as pd
-from pathlib import Path
-from typing import Dict, Any
 
 
 def load_model_from_file(model_path: str):
@@ -14,11 +15,7 @@ def load_model_from_file(model_path: str):
     return joblib.load(path)
 
 
-def load_model_from_registry(
-    model_name: str,
-    stage: str,
-    tracking_uri: str
-):
+def load_model_from_registry(model_name: str, stage: str, tracking_uri: str):
     """
     Load the model from MLflow Model Registry.
     """
@@ -40,5 +37,5 @@ def predict(model, processed_df: pd.DataFrame) -> Dict[str, Any]:
     return {
         "prediction": int(prediction),
         "probability": float(probability),
-        "label": label
+        "label": label,
     }

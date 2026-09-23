@@ -1,14 +1,13 @@
-from fastapi import FastAPI, HTTPException
-from typing import List
 import yaml
+from fastapi import FastAPI, HTTPException
 
 from app.schemas import (
-    OrderRequest,
-    PredictionResponse,
     BatchOrderRequest,
     BatchPredictionResponse,
     HealthResponse,
-    ModelInfoResponse
+    ModelInfoResponse,
+    OrderRequest,
+    PredictionResponse,
 )
 from src.pipeline import run_inference
 
@@ -23,16 +22,13 @@ config = load_config()
 app = FastAPI(
     title="Olist Late Orders Prediction API",
     description="Predict whether an order will be delivered late or on time",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 def health_check():
-    return {
-        "status": "ok",
-        "model_version": config["model"]["stage"]
-    }
+    return {"status": "ok", "model_version": config["model"]["stage"]}
 
 
 @app.get("/model-info", response_model=ModelInfoResponse, tags=["Model"])
@@ -40,7 +36,7 @@ def model_info():
     return {
         "model_name": config["model"]["registered_name"],
         "model_version": config["model"]["version"],
-        "stage": config["model"]["stage"]
+        "stage": config["model"]["stage"],
     }
 
 

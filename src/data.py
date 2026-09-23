@@ -1,6 +1,6 @@
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 
 
 def load_city_mapping(mapping_path: str) -> pd.DataFrame:
@@ -13,18 +13,14 @@ def load_city_mapping(mapping_path: str) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"City mapping file not found: {mapping_path}")
 
-    city_mapping = (
-        pd.read_csv(path)
+    city_mapping = pd.read_csv(path)[
         [
-            [
-                "geolocation_zip_code_prefix",
-                "geolocation_state",
-                "geolocation_city",
-                "city_clean"
-            ]
+            "geolocation_zip_code_prefix",
+            "geolocation_state",
+            "geolocation_city",
+            "city_clean",
         ]
-        .drop_duplicates()
-    )
+    ].drop_duplicates()
 
     return city_mapping
 
@@ -37,17 +33,13 @@ def apply_city_mapping(df: pd.DataFrame, city_mapping: pd.DataFrame) -> pd.DataF
 
     df = df.merge(
         city_mapping,
-        left_on=[
-            "customer_zip_code",
-            "customer_state",
-            "customer_city"
-        ],
+        left_on=["customer_zip_code", "customer_state", "customer_city"],
         right_on=[
             "geolocation_zip_code_prefix",
             "geolocation_state",
-            "geolocation_city"
+            "geolocation_city",
         ],
-        how="left"
+        how="left",
     )
 
     # Replace original city with cleaned city
@@ -59,9 +51,9 @@ def apply_city_mapping(df: pd.DataFrame, city_mapping: pd.DataFrame) -> pd.DataF
             "geolocation_zip_code_prefix",
             "geolocation_state",
             "geolocation_city",
-            "city_clean"
+            "city_clean",
         ],
-        errors="ignore"
+        errors="ignore",
     )
 
     return df

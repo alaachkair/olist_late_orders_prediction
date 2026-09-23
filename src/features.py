@@ -1,6 +1,5 @@
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 
 # List of large cities (from your notebook)
 LARGE_CITIES = [
@@ -23,7 +22,7 @@ LARGE_CITIES = [
     "sao luis",
     "maceio",
     "duque d caxias",
-    "sao bernardo d campo"
+    "sao bernardo d campo",
 ]
 
 CAPITAL_CITY = "brasilia"
@@ -35,7 +34,7 @@ LOG_COLS = [
     "unique_products",
     "unique_sellers",
     "payment_count",
-    "total_payment_value"
+    "total_payment_value",
 ]
 
 
@@ -57,13 +56,17 @@ def create_time_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     df["order_purchase_timestamp"] = pd.to_datetime(df["order_purchase_timestamp"])
-    df["order_estimated_delivery_date"] = pd.to_datetime(df["order_estimated_delivery_date"])
+    df["order_estimated_delivery_date"] = pd.to_datetime(
+        df["order_estimated_delivery_date"]
+    )
 
     df["purchase_month"] = df["order_purchase_timestamp"].dt.month
     df["purchase_dayofweek"] = df["order_purchase_timestamp"].dt.dayofweek
     df["purchase_day"] = df["order_purchase_timestamp"].dt.day
     df["purchase_hour"] = df["order_purchase_timestamp"].dt.hour
-    df["purchase_weekofyear"] = df["order_purchase_timestamp"].dt.isocalendar().week.astype(int)
+    df["purchase_weekofyear"] = (
+        df["order_purchase_timestamp"].dt.isocalendar().week.astype(int)
+    )
     df["purchase_quarter"] = df["order_purchase_timestamp"].dt.quarter
     df["is_weekend"] = (df["purchase_dayofweek"] >= 5).astype(int)
 
@@ -76,9 +79,9 @@ def create_time_features(df: pd.DataFrame) -> pd.DataFrame:
         columns=[
             "order_purchase_timestamp",
             "order_approved_at",
-            "order_estimated_delivery_date"
+            "order_estimated_delivery_date",
         ],
-        errors="ignore"
+        errors="ignore",
     )
 
     return df

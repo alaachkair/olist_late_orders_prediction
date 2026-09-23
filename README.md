@@ -71,4 +71,3 @@ Notes
 No hardcoded paths or parameters — everything comes from config/config.yaml
 
 Training stays in notebooks. This repo only contains the inference pipeline.
-

@@ -1,16 +1,18 @@
-import pytest
-import pandas as pd
 from pathlib import Path
-from src.predict import load_model_from_file, predict
-from src.preprocessing import load_preprocessor, apply_preprocessor
+
+import pandas as pd
+import pytest
+import yaml
+
+from src.data import apply_city_mapping, load_city_mapping
 from src.features import (
     create_city_features,
-    create_time_features,
+    create_log_features,
     create_review_features,
-    create_log_features
+    create_time_features,
 )
-from src.data import load_city_mapping, apply_city_mapping
-import yaml
+from src.predict import load_model_from_file, predict
+from src.preprocessing import apply_preprocessor, load_preprocessor
 
 
 def load_config():
@@ -27,14 +29,18 @@ def artifacts_exist() -> bool:
     return model_path.exists() and mapping_path.exists() and preprocessor_path.exists()
 
 
-@pytest.mark.skipif(not artifacts_exist(), reason="Model and data artifacts not available in CI")
+@pytest.mark.skipif(
+    not artifacts_exist(), reason="Model and data artifacts not available in CI"
+)
 def test_model_loads():
     config = load_config()
     model = load_model_from_file(config["paths"]["model"])
     assert model is not None
 
 
-@pytest.mark.skipif(not artifacts_exist(), reason="Model and data artifacts not available in CI")
+@pytest.mark.skipif(
+    not artifacts_exist(), reason="Model and data artifacts not available in CI"
+)
 def test_predict_returns_expected_keys():
     config = load_config()
 
@@ -56,7 +62,7 @@ def test_predict_returns_expected_keys():
         "unique_payment_types": 1,
         "review_count": 1,
         "avg_review_score": 4.0,
-        "min_review_score": 4.0
+        "min_review_score": 4.0,
     }
 
     df = pd.DataFrame([order])

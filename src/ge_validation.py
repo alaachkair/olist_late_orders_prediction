@@ -1,5 +1,4 @@
-from typing import Dict, Any, List
-
+from typing import Any, Dict
 
 REQUIRED_FIELDS = [
     "order_purchase_timestamp",
@@ -18,13 +17,37 @@ REQUIRED_FIELDS = [
     "unique_payment_types",
     "review_count",
     "avg_review_score",
-    "min_review_score"
+    "min_review_score",
 ]
 
 BRAZILIAN_STATES = [
-    "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA",
-    "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN",
-    "RO", "RR", "RS", "SC", "SE", "SP", "TO"
+    "AC",
+    "AL",
+    "AM",
+    "AP",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MG",
+    "MS",
+    "MT",
+    "PA",
+    "PB",
+    "PE",
+    "PI",
+    "PR",
+    "RJ",
+    "RN",
+    "RO",
+    "RR",
+    "RS",
+    "SC",
+    "SE",
+    "SP",
+    "TO",
 ]
 
 

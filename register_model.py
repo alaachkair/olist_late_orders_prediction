@@ -1,8 +1,7 @@
+import joblib
 import mlflow
 import mlflow.sklearn
-import joblib
 import yaml
-from pathlib import Path
 
 
 def load_config(config_path: str = "config/config.yaml"):
@@ -22,7 +21,6 @@ def main():
 
     # Load objects
     model = joblib.load(model_path)
-    preprocessor = joblib.load(preprocessor_path)
 
     # MLflow setup
     mlflow.set_tracking_uri(tracking_uri)
@@ -39,8 +37,8 @@ def main():
             artifact_path="model",
             registered_model_name=registered_name,
             skops_trusted_types=[
-        "sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor"
-            ]
+                "sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor"
+            ],
         )
 
         # Log preprocessor

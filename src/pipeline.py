@@ -1,21 +1,21 @@
 import time
-import yaml
-import pandas as pd
-from typing import Dict, Any
+from typing import Any, Dict
 
-from src.data import load_city_mapping, apply_city_mapping
+import pandas as pd
+import yaml
+
+from src.data import apply_city_mapping, load_city_mapping
 from src.features import (
     create_city_features,
-    create_time_features,
+    create_log_features,
     create_review_features,
-    create_log_features
+    create_time_features,
 )
-from src.preprocessing import load_preprocessor, apply_preprocessor
-from src.predict import load_model_from_registry, load_model_from_file, predict
-from src.validation import validate_order
 from src.ge_validation import validate_with_great_expectations
 from src.logging_config import setup_logging
-
+from src.predict import load_model_from_file, load_model_from_registry, predict
+from src.preprocessing import apply_preprocessor, load_preprocessor
+from src.validation import validate_order
 
 logger = setup_logging()
 
@@ -25,10 +25,7 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
         return yaml.safe_load(f)
 
 
-def run_inference(
-    order: Dict[str, Any],
-    use_registry: bool = True
-) -> Dict[str, Any]:
+def run_inference(order: Dict[str, Any], use_registry: bool = True) -> Dict[str, Any]:
     """
     Full inference pipeline for one order.
     Can load the model either from MLflow Model Registry or from a local file.
@@ -65,11 +62,13 @@ def run_inference(
 
         # 7. Load model (from registry or local file)
         if use_registry:
-            logger.info(f"Loading model from MLflow Model Registry ({config['model']['stage']})")
+            logger.info(
+                f"Loading model from MLflow Model Registry ({config['model']['stage']})"
+            )
             model = load_model_from_registry(
                 model_name=config["model"]["registered_name"],
                 stage=config["model"]["stage"],
-                tracking_uri=config["mlflow"]["tracking_uri"]
+                tracking_uri=config["mlflow"]["tracking_uri"],
             )
             model_version = config["model"]["stage"]
         else:

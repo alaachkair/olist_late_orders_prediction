@@ -17,7 +17,7 @@ model:
   version: "1"
   registered_name: "olist_late_order_model"
   stage: "Staging"
-  
+
 mlflow:
   tracking_uri: "sqlite:///mlflow.db"
   experiment_name: "olist_late_orders"

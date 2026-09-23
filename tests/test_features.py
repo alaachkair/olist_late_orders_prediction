@@ -1,17 +1,15 @@
 import pandas as pd
-import pytest
+
 from src.features import (
     create_city_features,
-    create_time_features,
+    create_log_features,
     create_review_features,
-    create_log_features
+    create_time_features,
 )
 
 
 def test_create_city_features():
-    df = pd.DataFrame({
-        "customer_city": ["sao paulo", "campinas", "unknown city"]
-    })
+    df = pd.DataFrame({"customer_city": ["sao paulo", "campinas", "unknown city"]})
 
     result = create_city_features(df)
 
@@ -24,11 +22,13 @@ def test_create_city_features():
 
 
 def test_create_time_features():
-    df = pd.DataFrame({
-        "order_purchase_timestamp": ["2018-05-10 14:30:00"],
-        "order_estimated_delivery_date": ["2018-05-25 00:00:00"],
-        "order_approved_at": ["2018-05-10 15:00:00"]
-    })
+    df = pd.DataFrame(
+        {
+            "order_purchase_timestamp": ["2018-05-10 14:30:00"],
+            "order_estimated_delivery_date": ["2018-05-25 00:00:00"],
+            "order_approved_at": ["2018-05-10 15:00:00"],
+        }
+    )
 
     result = create_time_features(df)
 
@@ -40,11 +40,13 @@ def test_create_time_features():
 
 
 def test_create_review_features():
-    df = pd.DataFrame({
-        "review_count": [1, None],
-        "avg_review_score": [4.5, None],
-        "min_review_score": [4.0, None]
-    })
+    df = pd.DataFrame(
+        {
+            "review_count": [1, None],
+            "avg_review_score": [4.5, None],
+            "min_review_score": [4.0, None],
+        }
+    )
 
     result = create_review_features(df)
 
@@ -55,15 +57,17 @@ def test_create_review_features():
 
 
 def test_create_log_features():
-    df = pd.DataFrame({
-        "item_count": [1],
-        "total_item_price": [100.0],
-        "total_freight_value": [15.0],
-        "unique_products": [1],
-        "unique_sellers": [1],
-        "payment_count": [1],
-        "total_payment_value": [115.0]
-    })
+    df = pd.DataFrame(
+        {
+            "item_count": [1],
+            "total_item_price": [100.0],
+            "total_freight_value": [15.0],
+            "unique_products": [1],
+            "unique_sellers": [1],
+            "payment_count": [1],
+            "total_payment_value": [115.0],
+        }
+    )
 
     result = create_log_features(df)
 

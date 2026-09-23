@@ -1,6 +1,6 @@
 import mlflow
-from mlflow.tracking import MlflowClient
 import yaml
+from mlflow.tracking import MlflowClient
 
 
 def load_config(config_path: str = "config/config.yaml"):
@@ -18,11 +18,7 @@ def main():
     client = MlflowClient()
 
     # Transition version 1 to Staging
-    client.transition_model_version_stage(
-        name=model_name,
-        version=1,
-        stage="Staging"
-    )
+    client.transition_model_version_stage(name=model_name, version=1, stage="Staging")
 
     print(f"Model '{model_name}' version 1 moved to Staging")
 

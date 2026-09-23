@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import joblib
 import pandas as pd
-from pathlib import Path
 
 
 def load_preprocessor(preprocessor_path: str):
@@ -29,10 +30,6 @@ def apply_preprocessor(df: pd.DataFrame, preprocessor) -> pd.DataFrame:
     feature_names = preprocessor.get_feature_names_out()
 
     # Convert back to DataFrame
-    processed_df = pd.DataFrame(
-        processed,
-        columns=feature_names,
-        index=df.index
-    )
+    processed_df = pd.DataFrame(processed, columns=feature_names, index=df.index)
 
     return processed_df

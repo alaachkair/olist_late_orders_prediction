@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OrderRequest(BaseModel):
@@ -42,7 +43,7 @@ class OrderRequest(BaseModel):
                 "unique_payment_types": 1,
                 "review_count": 1,
                 "avg_review_score": 4.0,
-                "min_review_score": 4.0
+                "min_review_score": 4.0,
             }
         }
 
