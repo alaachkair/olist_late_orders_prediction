@@ -48,7 +48,7 @@ def model_info():
 def predict_single(order: OrderRequest):
     try:
         order_dict = order.model_dump()
-        result = run_inference(order=order_dict, use_registry=True)
+        result = run_inference(order=order_dict, use_registry=False)
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -60,7 +60,7 @@ def predict_batch(batch: BatchOrderRequest):
         results = []
         for order in batch.orders:
             order_dict = order.model_dump()
-            result = run_inference(order=order_dict, use_registry=True)
+            result = run_inference(order=order_dict, use_registry=False)
             results.append(result)
         return {"predictions": results}
     except Exception as e:
