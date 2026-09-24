@@ -1,73 +1,47 @@
-\# Olist Late Orders Prediction
+# Olist Late Orders Prediction Service
 
+Inference service that predicts whether an order will be delivered **late** or **on time**.
 
+This project turns the trained model from the notebooks into a production-ready inference pipeline with:
 
-Inference service that predicts whether an order will be delivered late or on time.
+- Clean Python modules
+- FastAPI service
+- Docker & Docker Compose
+- MLflow model registry
+- Data validation
+- Logging & monitoring
+- CI/CD with GitHub Actions
+- Pre-commit hooks
 
+---
 
+## Project Structure
 
-\## Project Structure
-
-olist\_late\_orders\_prediction/
-
+```text
+olist_late_orders_prediction/
 ├── app/                  # FastAPI application
-
-├── config/               # Configuration files
-
-├── data/                 # Data (tracked later with DVC)
-
-├── models/               # Saved models \& transformers
-
-├── notebooks/            # Original notebooks
-
-├── src/                  # Core Python modules
-
-├── tests/                # Unit \& integration tests
-
-├── requirements.txt      # Runtime dependencies
-
-├── requirements-dev.txt  # Development dependencies
-
+│   ├── main.py
+│   └── schemas.py
+├── config/
+│   └── config.yaml       # All paths and parameters
+├── data/                 # Data files (DVC tracked)
+├── models/               # Model & preprocessor (DVC tracked)
+├── src/                  # Core business logic
+│   ├── data.py
+│   ├── features.py
+│   ├── preprocessing.py
+│   ├── predict.py
+│   ├── pipeline.py
+│   ├── validation.py
+│   ├── ge_validation.py
+│   ├── logging_config.py
+│   └── metrics.py
+├── tests/                # Unit tests
+├── logs/                 # Prediction logs & service logs
+├── notebooks/            # Original notebooks (not used in production)
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── requirements-dev.txt
+├── MONITORING.md
 └── README.md
-
-
-
-\## Setup (from zero)
-
-
-
-```bash
-
-\# 1. Clone the repository
-
-git clone <your-repo-url>
-
-cd olist\_late\_orders\_prediction
-
-
-
-\# 2. Create virtual environment
-
-python -m venv .venv
-
-source .venv/Scripts/activate      # Windows (Git Bash)
-
-\# source .venv/bin/activate        # Mac/Linux
-
-
-
-\# 3. Install dependencies
-
-pip install -r requirements-dev.txt
-
-How to run
-
-(Coming in later steps)
-
-Notes
-
-
-
-No hardcoded paths or parameters — everything comes from config/config.yaml
-
-Training stays in notebooks. This repo only contains the inference pipeline.
