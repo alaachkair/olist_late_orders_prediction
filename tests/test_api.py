@@ -1,8 +1,26 @@
+from pathlib import Path
+
+import pytest
+import yaml
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 client = TestClient(app)
+
+
+def load_config():
+    with open("config/config.yaml", "r") as f:
+        return yaml.safe_load(f)
+
+
+def artifacts_exist() -> bool:
+    """Check if required model and data files exist."""
+    config = load_config()
+    model_path = Path(config["paths"]["model"])
+    mapping_path = Path(config["paths"]["city_mapping"])
+    preprocessor_path = Path(config["paths"]["preprocessor"])
+    return model_path.exists() and mapping_path.exists() and preprocessor_path.exists()
 
 
 def test_health():
@@ -33,6 +51,9 @@ def test_metrics():
     assert "prediction_distribution" in data
 
 
+@pytest.mark.skipif(
+    not artifacts_exist(), reason="Model and data artifacts not available in CI"
+)
 def test_predict_success():
     payload = {
         "order_purchase_timestamp": "2018-05-10 14:30:00",
@@ -67,7 +88,6 @@ def test_predict_success():
 
 
 def test_predict_invalid_payload():
-    # Missing many required fields
     payload = {"customer_state": "SP"}
     response = client.post("/predict", json=payload)
-    assert response.status_code == 422  # FastAPI validation error
+    assert response.status_code == 422
