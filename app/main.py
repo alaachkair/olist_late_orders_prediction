@@ -55,7 +55,13 @@ def predict_single(order: OrderRequest):
         order_dict = order.model_dump()
         result = run_inference(order=order_dict, use_registry=False)
         latency = time.time() - start
-        record_request(latency=latency, success=True, label=result["label"])
+        record_request(
+            latency=latency,
+            success=True,
+            label=result["label"],
+            order=order_dict,
+            result=result,
+        )
         return result
     except Exception as e:
         latency = time.time() - start

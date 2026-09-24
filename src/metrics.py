@@ -1,6 +1,9 @@
+import json
 import threading
 from collections import Counter
-from typing import Dict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict
 
 # Thread-safe simple metrics store
 _lock = threading.Lock()
@@ -10,19 +13,45 @@ _error_count = 0
 _latencies = []
 _prediction_labels = Counter()
 
+LOG_FILE = Path("logs/predictions.jsonl")
 
-def record_request(latency: float, success: bool = True, label: str = None):
+
+def _ensure_log_dir():
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
+def record_request(
+    latency: float,
+    success: bool = True,
+    label: str = None,
+    order: Dict[str, Any] = None,
+    result: Dict[str, Any] = None,
+):
     global _request_count, _error_count
     with _lock:
         _request_count += 1
         if not success:
             _error_count += 1
         _latencies.append(latency)
-        # Keep only the last 1000 latencies to avoid memory growth
         if len(_latencies) > 1000:
             _latencies.pop(0)
         if label:
             _prediction_labels[label] += 1
+
+        # Store prediction log (only on success)
+        if success and order is not None and result is not None:
+            _ensure_log_dir()
+            log_entry = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "order": order,
+                "prediction": result.get("prediction"),
+                "probability": result.get("probability"),
+                "label": result.get("label"),
+                "model_version": result.get("model_version"),
+                "latency_seconds": latency,
+            }
+            with open(LOG_FILE, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
 
 
 def get_metrics() -> Dict:
